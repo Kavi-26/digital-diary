@@ -1,0 +1,25 @@
+<form id="entryForm">
+    <h2>New Diary Entry</h2>
+    <label for="entryTitle">Title:</label>
+    <input type="text" id="entryTitle" name="entryTitle" required>
+
+    <label for="entryContent">Content:</label>
+    <textarea id="entryContent" name="entryContent" rows="5" required></textarea>
+
+    <label for="entryDate">Date:</label>
+    <input type="date" id="entryDate" name="entryDate" required>
+
+    <button type="submit">Save Entry</button>
+</form>
+
+<script>
+    document.getElementById('entryForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const title = document.getElementById('entryTitle').value;
+        const content = document.getElementById('entryContent').value;
+        const date = document.getElementById('entryDate').value;
+
+        // Logic to save the entry can be added here
+        console.log('Entry Saved:', { title, content, date });
+    });
+</script>

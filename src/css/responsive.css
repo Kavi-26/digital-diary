@@ -1,0 +1,39 @@
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .entry-form {
+        flex-direction: column;
+    }
+
+    .entry-list {
+        font-size: 14px;
+    }
+
+    .entry {
+        padding: 10px;
+        margin: 5px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 24px;
+    }
+
+    .entry {
+        font-size: 12px;
+    }
+
+    .button {
+        padding: 8px;
+        font-size: 14px;
+    }
+}
