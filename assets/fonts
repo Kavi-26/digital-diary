@@ -1,1 +1,21 @@
-This directory is intentionally left blank.
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDV-mSjzcoy_RgM_tEqpIgFYG9EnU96FxM",
+  authDomain: "digitaldiary-83e15.firebaseapp.com",
+  projectId: "digitaldiary-83e15",
+  storageBucket: "digitaldiary-83e15.firebasestorage.app",
+  messagingSenderId: "768574869179",
+  appId: "1:768574869179:web:f3c17ce7a64ea5f044239e",
+  measurementId: "G-ZWDG7BNCKT"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);

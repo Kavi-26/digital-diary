@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    function handleFormSubmit(event) {
+    async function handleFormSubmit(event) {
         event.preventDefault();
         const entry = getFormEntry(false);
         if (!entry.title || !entry.content) {
@@ -169,32 +169,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Load and Display Entries ---
-    function loadAndDisplayEntries() {
-        const entries = getEntries();
+    async function loadAndDisplayEntries() {
+        const entries = await window.getEntries();
         allEntriesCache = entries;
         currentPage = 1;
         displayEntries(entries);
     }
 
     // --- Favorite Toggle ---
-    function toggleFavorite(entryId) {
-        let entries = getEntries();
-        const idx = entries.findIndex(e => e.id === entryId);
+    async function toggleFavorite(entryId) {
+        let entries = await window.getEntries();
+        const idx = entries.findIndex(e => e.id === entryId || e._id === entryId);
         if (idx > -1) {
             entries[idx].favorite = !entries[idx].favorite;
-            localStorage.setItem('diaryEntries', JSON.stringify(entries));
+            if (entries[idx]._id) {
+                await window.updateEntry(entries[idx]._id, entries[idx]);
+            } else {
+                await window.updateEntry(idx, entries[idx]);
+            }
             showNotification(entries[idx].favorite ? 'Marked as favorite' : 'Removed from favorites', 'success');
             loadAndDisplayEntries();
         }
     }
 
     // --- Export Single Entry ---
-    function exportSingleEntry(entry) {
+    async function exportSingleEntry(entry) {
         const dataStr = JSON.stringify(entry, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(dataBlob);
-        link.download = `diary-entry-${entry.id}.json`;
+        link.download = `diary-entry-${entry.id || entry._id}.json`;
         link.click();
         showNotification('Entry exported as JSON', 'success');
     }
@@ -293,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
             // Favorite button event
-            entryElement.querySelector('.favorite-btn').onclick = () => toggleFavorite(entry.id);
+            entryElement.querySelector('.favorite-btn').onclick = () => toggleFavorite(entry.id || entry._id);
             entryList.appendChild(entryElement);
         });
         // Load more
@@ -340,8 +344,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Edit/Delete Handlers ---
-    window.editEntry = function(index) {
-        const entries = getEntries();
+    window.editEntry = async function(index) {
+        const entries = await window.getEntries();
         const entry = entries[index];
         entryForm.title.value = entry.title;
         entryContentDiv.innerHTML = entry.content;
@@ -351,23 +355,23 @@ document.addEventListener('DOMContentLoaded', () => {
         entryTagsInput.value = (entry.tags || []).join(', ');
         renderTags(entry.tags || []);
         updateWordCount();
-        editingIndex = index;
+        editingIndex = entry._id || index;
         document.getElementById('submit-text').textContent = 'Update Entry';
         document.getElementById('form-title').textContent = 'Edit Diary Entry';
         document.querySelector('.entry-form').scrollIntoView({ behavior: 'smooth' });
     };
 
-    window.deleteEntryConfirm = function(index) {
+    window.deleteEntryConfirm = async function(indexOrId) {
         if (confirm('Are you sure you want to delete this entry?')) {
-            deleteEntry(index);
+            await window.deleteEntry(indexOrId);
             showNotification('Entry deleted', 'success');
             loadAndDisplayEntries();
         }
     };
 
     // --- Statistics ---
-    window.updateStatistics = function() {
-        const entries = getEntries().filter(e => !e.draft);
+    window.updateStatistics = async function() {
+        const entries = (await window.getEntries()).filter(e => !e.draft);
 
         // Entries per Month
         const months = Array.from({length: 12}, (_, i) => new Date(0, i).toLocaleString('en', {month: 'short'}));
@@ -470,12 +474,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (filterContainer) filterContainer.appendChild(favoritesOnlyToggle);
 
     // --- Handlers for copy/export single entry ---
-    window.copyEntryContentHandler = function(entryId) {
-        const entry = getEntries().find(e => e.id === entryId);
+    window.copyEntryContentHandler = async function(entryId) {
+        const entries = await window.getEntries();
+        const entry = entries.find(e => (e.id || e._id) === entryId);
         if (entry) copyEntryContent(entry.content);
     };
-    window.exportEntryHandler = function(entryId) {
-        const entry = getEntries().find(e => e.id === entryId);
+    window.exportEntryHandler = async function(entryId) {
+        const entries = await window.getEntries();
+        const entry = entries.find(e => (e.id || e._id) === entryId);
         if (entry) exportSingleEntry(entry);
     };
 
